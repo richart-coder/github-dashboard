@@ -5,8 +5,6 @@ import { notificationsQueryOptions } from "@/data/query-options/notifications";
 import { useState } from "react";
 import NotificationItem from "./NotificationItem";
 
-
-
 async function markAsRead(threadId: string) {
   const response = await fetch(`/api/notifications/${threadId}/read`, {
     method: "PATCH",
