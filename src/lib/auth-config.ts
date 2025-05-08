@@ -15,17 +15,20 @@ export const authOptions: NextAuthOptions = {
   ],
   callbacks: {
     async jwt({ token, account }) {
-      if (account) {
-        token.accessToken = account.access_token;
-      }
-      return token;
+      if (!account) return token;
+
+      return {
+        ...token,
+        accessToken: account.access_token,
+      };
     },
     async session({ session, token }) {
-      session.accessToken = token.accessToken;
-      return session;
+      if (session.accessToken) return session;
+
+      return {
+        ...session,
+        accessToken: token.accessToken,
+      };
     },
-  },
-  pages: {
-    signIn: "/auth/signin",
   },
 };
