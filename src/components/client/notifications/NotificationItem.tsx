@@ -1,4 +1,5 @@
 import React from "react";
+import type { Notification } from "@/types/notification";
 
 const TYPE_TO_PATH: Record<string, string> = {
   Issue: "issues",
@@ -6,7 +7,7 @@ const TYPE_TO_PATH: Record<string, string> = {
 };
 
 type NotificationItemProps = {
-  notification: any;
+  notification: Notification;
   onMarkAsRead: (id: string, unread: boolean) => void;
   markAsReadPending: boolean;
 };
