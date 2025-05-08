@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-
+import isClient from "@/lib/is-client";
 export type NotificationPriority =
   | "CRITICAL"
   | "HIGH"
@@ -18,7 +18,7 @@ export interface LocalNotificationState {
 const STORAGE_KEY = "localNotificationState";
 
 function loadState(): Record<string, LocalNotificationState> {
-  if (typeof window === "undefined") return {};
+  if (!isClient()) return {};
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     return raw ? JSON.parse(raw) : {};
@@ -28,7 +28,6 @@ function loadState(): Record<string, LocalNotificationState> {
 }
 
 function saveState(state: Record<string, LocalNotificationState>) {
-  if (typeof window === "undefined") return;
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 }
 
