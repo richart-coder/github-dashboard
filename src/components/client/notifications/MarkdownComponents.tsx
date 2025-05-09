@@ -20,7 +20,7 @@ export const MarkdownComponents = {
       {...props}
     />
   ),
-  ol: ({ ...props }) => <ul className="mb-4 list-disc ml-6" {...props} />,
+  ol: ({ ...props }) => <ol className="mb-4 list-decimal ml-6" {...props} />,
   ul: ({ ...props }) => <ul className="mb-4 list-disc ml-6" {...props} />,
   li: ({ ...props }) => <li className="mb-1.5" {...props} />,
   code: ({ ...props }: any) => (
