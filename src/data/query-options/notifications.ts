@@ -11,3 +11,16 @@ export function notificationsQueryOptions() {
     cacheTime: 10 * MINUTE,
   };
 }
+
+export function notificationDetailQueryOptions(apiUrl: string | null) {
+  return {
+    queryKey: ["notification-detail", apiUrl],
+    queryFn: async () => {
+      if (!apiUrl) throw new Error("無效的內容網址");
+      const res = await fetch(apiUrl);
+      if (!res.ok) throw new Error("無法取得內容");
+      return res.json();
+    },
+    enabled: Boolean(apiUrl),
+  };
+}
