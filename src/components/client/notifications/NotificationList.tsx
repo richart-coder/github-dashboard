@@ -1,6 +1,5 @@
 "use client";
-import useFocusTrap from "./useTrapFocus";
-import useEscapeKey from "./useEscapeKey";
+
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   notificationsQueryOptions,
@@ -13,6 +12,7 @@ import OverlayModal from "./OverlayModal";
 import ReactMarkdown from "react-markdown";
 import { MarkdownComponents } from "./MarkdownComponents";
 import Spinner from "./Spinner";
+import useDialogControl from "./useDialogControl";
 
 async function markAsRead(threadId: string) {
   const response = await fetch(`/api/notifications/${threadId}/read`, {
@@ -32,15 +32,13 @@ export default function NotificationList() {
   } = useQuery(notificationsQueryOptions());
   const queryClient = useQueryClient();
 
-  const [modalOpen, setModalOpen] = useState(false);
+  const [dialogRef, openDialog, closeDialog] = useDialogControl();
   const handleCloseModal = useCallback(() => {
-    setModalOpen(false);
-  }, []);
+    closeDialog();
+  }, [closeDialog]);
   const [selectedApiUrl, setSelectedApiUrl] = useState<string | null>(null);
   const [selectedTitle, setSelectedTitle] = useState<string>("");
 
-  const modalRef = useFocusTrap(modalOpen);
-  useEscapeKey(modalOpen, handleCloseModal);
   const {
     data: detail,
     isError: detailError,
@@ -68,7 +66,7 @@ export default function NotificationList() {
   const handleShowContent = (apiUrl: string, title: string) => {
     setSelectedApiUrl(apiUrl);
     setSelectedTitle(title);
-    setModalOpen(true);
+    openDialog();
   };
 
   if (isLoadingNotifications) return <div>Loading notifications...</div>;
@@ -90,10 +88,9 @@ export default function NotificationList() {
         />
       ))}
       <OverlayModal
-        ref={modalRef}
-        open={modalOpen}
-        onClose={() => setModalOpen(false)}
-        title={`${selectedTitle} 詳細內容`}
+        ref={dialogRef}
+        onClose={handleCloseModal}
+        title={selectedTitle}
       >
         {isLoadingDetail ? (
           <div className="flex-1 flex items-center justify-center">
