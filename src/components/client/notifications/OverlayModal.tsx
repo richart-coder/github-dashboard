@@ -20,7 +20,7 @@ export default function OverlayModal({
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-lg shadow-lg max-w-2xl w-full max-h-[80vh] min-h-[200px] min-w-[300px] flex flex-col overflow-y-auto p-6 relative scrollbar-hide"
+        className="scrollbar-hide bg-white rounded-lg shadow-lg max-w-2xl w-full max-h-[80vh] min-h-[200px] min-w-[300px] flex flex-col overflow-y-auto p-6 relative"
         onClick={(e) => e.stopPropagation()}
       >
         <button
