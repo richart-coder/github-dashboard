@@ -1,12 +1,14 @@
 "use client";
-
+import useFocusTrap from "./useTrapFocus";
+import useEscapeKey from "./useEscapeKey";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   notificationsQueryOptions,
   notificationDetailQueryOptions,
 } from "@/data/query-options/notifications";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import NotificationItem from "./NotificationItem";
+import { Notification } from "@/types/notification";
 import OverlayModal from "./OverlayModal";
 import ReactMarkdown from "react-markdown";
 import { MarkdownComponents } from "./MarkdownComponents";
@@ -23,18 +25,26 @@ async function markAsRead(threadId: string) {
 }
 
 export default function NotificationList() {
-  const { data, isLoading, error } = useQuery(notificationsQueryOptions());
-  const [showIgnored, setShowIgnored] = useState(false);
+  const {
+    data,
+    isLoading: isLoadingNotifications,
+    error,
+  } = useQuery(notificationsQueryOptions());
   const queryClient = useQueryClient();
 
   const [modalOpen, setModalOpen] = useState(false);
+  const handleCloseModal = useCallback(() => {
+    setModalOpen(false);
+  }, []);
   const [selectedApiUrl, setSelectedApiUrl] = useState<string | null>(null);
   const [selectedTitle, setSelectedTitle] = useState<string>("");
 
+  const modalRef = useFocusTrap(modalOpen);
+  useEscapeKey(modalOpen, handleCloseModal);
   const {
     data: detail,
     isError: detailError,
-    isFetching,
+    isLoading: isLoadingDetail,
   } = useQuery<{ body?: string }>(
     notificationDetailQueryOptions(selectedApiUrl)
   );
@@ -61,28 +71,16 @@ export default function NotificationList() {
     setModalOpen(true);
   };
 
-  if (isLoading) return <div>Loading notifications...</div>;
+  if (isLoadingNotifications) return <div>Loading notifications...</div>;
   if (error)
     return (
       <div className="text-red-500">Error: {(error as Error).message}</div>
     );
   if (!data || data.length === 0) return <div>沒有通知</div>;
 
-  const filteredNotifications = data.filter((notification: any) => {
-    return showIgnored || !notification.ignored;
-  });
-
   return (
     <div className="space-y-4">
-      <div className="flex justify-end">
-        <button
-          onClick={() => setShowIgnored(!showIgnored)}
-          className="px-3 py-1 rounded text-sm font-semibold border bg-gray-100 text-gray-700 hover:bg-gray-200"
-        >
-          {showIgnored ? "隱藏已忽略" : "顯示已忽略"}
-        </button>
-      </div>
-      {filteredNotifications.map((notification: any) => (
+      {data.map((notification: Notification) => (
         <NotificationItem
           key={notification.id}
           notification={notification}
@@ -92,11 +90,12 @@ export default function NotificationList() {
         />
       ))}
       <OverlayModal
+        ref={modalRef}
         open={modalOpen}
         onClose={() => setModalOpen(false)}
         title={`${selectedTitle} 詳細內容`}
       >
-        {isFetching ? (
+        {isLoadingDetail ? (
           <div className="flex-1 flex items-center justify-center">
             <Spinner className="h-8 w-8 text-blue-600" />
           </div>
