@@ -1,13 +1,18 @@
 import React from "react";
-import type { Notification } from "@/types/notification";
-
-const TYPE_TO_PATH: Record<string, string> = {
-  Issue: "issues",
-  PullRequest: "pull",
-};
 
 type NotificationItemProps = {
-  notification: Notification;
+  notification: {
+    id: string;
+    unread: boolean;
+    subject: {
+      title: string;
+      url: string;
+      type: string;
+    };
+    updated_at: string;
+    url: string;
+    webUrl: string;
+  };
   onMarkAsRead: (id: string, unread: boolean) => void;
   markAsReadPending: boolean;
   onShowContent: (apiUrl: string, title: string) => void;
@@ -19,32 +24,14 @@ export default function NotificationItem({
   markAsReadPending,
   onShowContent,
 }: NotificationItemProps) {
-  const {
-    id,
-    repository: { full_name = "" } = {},
-    subject: { type = "", title = "", url: apiUrl = "" } = {},
-    updated_at = "",
-    unread = true,
-  } = notification;
-  const [owner, repo] = full_name.split("/");
-  const [_, number] = apiUrl.match(/\/(\d+)$/) ?? [];
-  const path = TYPE_TO_PATH[type];
-
-  let webUrl = "https://github.com/notifications";
-  if (owner && repo && number && path) {
-    webUrl = `https://github.com/${owner}/${repo}/${path}/${number}`;
-  } else if (full_name) {
-    webUrl = `https://github.com/${full_name}`;
-  }
+  const { id, subject, updated_at, unread, url, webUrl } = notification;
 
   return (
     <div className="border rounded-lg p-4 space-y-2 bg-white shadow">
       <div className="flex justify-between items-end">
         <div>
-          <p className="font-medium text-lg">{title}</p>
-          <p className="text-gray-500 text-sm">
-            {type} @{full_name}
-          </p>
+          <p className="font-medium text-lg">{subject.title}</p>
+          <p className="text-gray-500 text-sm">{subject.type}</p>
           <p className="text-gray-400 text-xs">
             {updated_at ? new Date(updated_at).toLocaleString() : ""}
           </p>
@@ -63,9 +50,9 @@ export default function NotificationItem({
           </div>
         </div>
         <div className="flex flex-col gap-2">
-          {apiUrl && (
+          {subject.url && (
             <button
-              onClick={() => onShowContent(apiUrl, title)}
+              onClick={() => onShowContent(subject.url, subject.title)}
               className="bg-blue-600 text-white rounded px-3 py-1 font-semibold hover:bg-blue-700 transition flex items-center justify-center cursor-pointer"
             >
               查看內容
