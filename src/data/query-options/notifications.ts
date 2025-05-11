@@ -1,14 +1,17 @@
+import type { QueryKey } from "@tanstack/react-query";
+import type { RepoWithNotifications } from "@/types/notification";
+
 const MINUTE = 1000 * 60;
-export function notificationsQueryOptions() {
+
+export function repositoriesQueryOptions(initialData: RepoWithNotifications[]) {
   return {
-    queryKey: ["notifications"],
-    queryFn: async () => {
-      const res = await fetch("/api/notifications", { cache: "no-store" });
-      if (!res.ok) throw new Error("Failed to fetch notifications");
-      return res.json();
-    },
-    staleTime: 5 * MINUTE,
-    cacheTime: 10 * MINUTE,
+    queryKey: ["repositories"] as QueryKey,
+    queryFn: async () => initialData,
+    staleTime: 30 * MINUTE,
+    gcTime: 60 * MINUTE,
+    initialData,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
   };
 }
 
@@ -16,11 +19,11 @@ export function notificationDetailQueryOptions(apiUrl: string | null) {
   return {
     queryKey: ["notification-detail", apiUrl],
     queryFn: async () => {
-      if (!apiUrl) throw new Error("無效的內容網址");
+      if (!apiUrl) return null;
       const res = await fetch(apiUrl);
       if (!res.ok) throw new Error("無法取得內容");
       return res.json();
     },
-    enabled: Boolean(apiUrl),
+    enabled: !!apiUrl,
   };
 }
