@@ -34,7 +34,7 @@ const OverlayModal = forwardRef<HTMLDialogElement, OverlayModalProps>(
             {title}
           </h2>
         )}
-        <div id="modal-description" className="flex-1 flex flex-col">
+        <div id="modal-description" className="flex-1 flex flex-col p-4">
           {children}
         </div>
       </div>
