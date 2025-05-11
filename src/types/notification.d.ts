@@ -1,13 +1,21 @@
 export interface Notification {
   id: string;
-  repository: {
-    full_name: string;
-  };
+  unread: boolean;
   subject: {
-    type: string;
     title: string;
     url: string;
+    type: string;
   };
   updated_at: string;
-  unread: boolean;
+  url: string;
+  webUrl: string;
+}
+export type NotificationKind = "Issue" | "PullRequest" | "Commit";
+export interface RepoWithNotifications {
+  name: string;
+  isActive: boolean;
+  preference: {
+    ignoredTypes: NotificationKind[];
+  };
+  notifications: Notification[];
 }
