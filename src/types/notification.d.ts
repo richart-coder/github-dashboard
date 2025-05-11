@@ -10,12 +10,12 @@ export interface Notification {
   url: string;
   webUrl: string;
 }
-
+export type NotificationKind = "Issue" | "PullRequest" | "Commit";
 export interface RepoWithNotifications {
   name: string;
   isActive: boolean;
   preference: {
-    ignoredTypes: string[];
+    ignoredTypes: NotificationKind[];
   };
   notifications: Notification[];
 }
