@@ -6,54 +6,31 @@ datasource db {
   provider = "sqlite"
   url      = "file:./dev.db"
 }
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  preferences RepositoryPreference[]
+}
+model RepositoryPreference {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  repository   String
+  isActive     Boolean  @default(false)
+  ignoredTypes String   
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
-enum Priority {
-  CRITICAL    
-  HIGH        
-  MEDIUM      
-  LOW       
-  IGNORED     
+  @@unique([userId, repository])
 }
 
-enum NotificationType {
-  PULL_REQUEST
-  ISSUE
-  COMMENT
-  REPOSITORY
-  SECURITY_ALERT
-  DEPENDENCY_UPDATE
-}
 
-enum NotificationStatus {
-  UNREAD
-  READ
-  ARCHIVED
-}
 
-model NotificationGroup {
-  id          String    @id @default(cuid())
-  type        NotificationType
-  repository  String
-  priority    Priority
-  status      NotificationStatus @default(UNREAD)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  count       Int       @default(1)  
-  lastActivity DateTime @default(now())
-  notifications Notification[]
-}
 
-model Notification {
-  id          String            @id @default(cuid())
-  title       String
-  content     String
-  type        NotificationType
-  url         String
-  sender      String
-  createdAt   DateTime          @default(now())
-  groupId     String
-  group       NotificationGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
-  isRead      Boolean           @default(false)
-}
+
+
+
 
 
