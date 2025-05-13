@@ -1,7 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
-import { NotificationKind } from "@/types/notification";
-
+import type { GitHubNotificationType } from "@/types/notification";
 export async function getRepositoryPreferences(
   userId: string,
   select?: Prisma.RepositoryPreferenceSelect
@@ -87,7 +86,7 @@ export async function setActiveRepository(userId: string, repository: string) {
 export const updateRepositoryPreferenceIgnoreTypes = async (
   userId: string,
   repository: string,
-  ignoredTypes: NotificationKind[],
+  ignoredTypes: GitHubNotificationType[],
   select?: Prisma.RepositoryPreferenceSelect
 ) => {
   try {

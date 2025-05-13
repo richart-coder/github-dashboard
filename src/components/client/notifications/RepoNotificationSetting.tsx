@@ -1,11 +1,11 @@
 "use client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Notification } from "@/types/notification";
+import { Notification, GitHubNotificationType } from "@/types/notification";
 import NotificationList from "./NotificationList";
-import { NotificationKind } from "@/types/notification";
+
 export const NOTIFICATION_TYPE_LABELS: {
   [key: string]: string;
-  value: NotificationKind;
+  value: GitHubNotificationType;
 }[] = [
   {
     label: "Pull Requests",
@@ -15,7 +15,7 @@ export const NOTIFICATION_TYPE_LABELS: {
   { label: "Issues", value: "Issue", desc: "問題報告和功能請求相關通知" },
   { label: "Commit", value: "Commit", desc: "程式碼提交相關通知" },
 ];
-const NOTIFICATION_TYPES: NotificationKind[] = [
+const NOTIFICATION_TYPES: GitHubNotificationType[] = [
   "Issue",
   "PullRequest",
   "Commit",
@@ -28,7 +28,7 @@ export default function RepoNotificationSetting({
 }: {
   repoName: string;
   notifications: Notification[];
-  preference: { ignoredTypes: NotificationKind[] };
+  preference: { ignoredTypes: GitHubNotificationType[] };
 }) {
   const queryClient = useQueryClient();
   const getPreferenceApiUrl = () => {
@@ -75,7 +75,7 @@ export default function RepoNotificationSetting({
     },
   });
 
-  const handleTypeChange = (type: NotificationKind) => {
+  const handleTypeChange = (type: GitHubNotificationType) => {
     const newTypes = preference.ignoredTypes.includes(type)
       ? preference.ignoredTypes.filter((t) => t !== type)
       : [...preference.ignoredTypes, type];
