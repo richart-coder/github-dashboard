@@ -18,18 +18,13 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, account, user }) {
       if (!user || !account) return token;
 
-      const dbUser = await prisma.user.findUnique({
-        where: { email: user.email! },
-      });
       return {
         ...token,
         accessToken: account.access_token,
-        id: dbUser?.id,
+        id: user.id,
       };
     },
     async session({ session, token }) {
-      if (session.accessToken) return session;
-
       return {
         ...session,
         user: {
@@ -42,7 +37,7 @@ export const authOptions: NextAuthOptions = {
     async signIn({ user }) {
       if (!user.email) return false;
 
-      await prisma.user.upsert({
+      const dbUser = await prisma.user.upsert({
         where: {
           email: user.email,
         },
@@ -51,6 +46,7 @@ export const authOptions: NextAuthOptions = {
           email: user.email,
         },
       });
+      user.id = dbUser.id;
       return true;
     },
   },

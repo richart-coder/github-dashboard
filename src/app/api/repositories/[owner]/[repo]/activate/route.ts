@@ -7,7 +7,7 @@ export async function PUT(
 ) {
   const { session } = await validateSession();
   const { owner, repo } = await context.params;
-  const [userId, repository] = [session.user?.id!, `${owner}/${repo}`];
+  const [userId, repository] = [session.user.id, `${owner}/${repo}`];
   const result = await setActiveRepository(userId, repository);
 
   return Response.json({ data: result[1] });
