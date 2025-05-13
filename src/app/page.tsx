@@ -17,7 +17,7 @@ export default function Home() {
       ) : (
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-4">
-            歡迎回來，{session.user?.name}！
+            歡迎回來，{session.user?.name}
           </h1>
           <p className="text-gray-600">您已成功登入</p>
         </div>

@@ -15,7 +15,7 @@ export default function RepoList({
     repositoriesQueryOptions(initialData)
   );
 
-  const currentRepo = data?.find((repo) => repo.isActive) || data?.[0];
+  const currentRepo = data.find((repo) => repo.isActive) || data?.[0];
 
   const { mutate: activateRepo } = useMutation({
     mutationFn: async (repoName: string) => {
@@ -27,7 +27,7 @@ export default function RepoList({
         }
       );
       if (!response.ok) throw new Error("Failed to activate repository");
-      return response.text();
+      return response.json();
     },
     onMutate: (repoName) => {
       NProgress.start();
@@ -61,7 +61,7 @@ export default function RepoList({
   });
 
   return (
-    <div>
+    <div className="p-12">
       <div className="mb-8">
         <label htmlFor="repo-select" className="sr-only">
           選擇儲存庫

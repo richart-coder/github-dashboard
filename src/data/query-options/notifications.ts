@@ -18,9 +18,9 @@ export function repositoriesQueryOptions(initialData: RepoWithNotifications[]) {
 export function notificationDetailQueryOptions(apiUrl: string | null) {
   return {
     queryKey: ["notification-detail", apiUrl],
-    queryFn: async () => {
+    queryFn: async ({ signal }: { signal: AbortSignal }) => {
       if (!apiUrl) return null;
-      const res = await fetch(apiUrl);
+      const res = await fetch(apiUrl, { signal });
       if (!res.ok) throw new Error("無法取得內容");
       return res.json();
     },
