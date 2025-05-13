@@ -1,49 +1,14 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth-config";
-import { prisma } from "@/lib/prisma";
-import { NextResponse } from "next/server";
+import { setActiveRepository } from "@/repositories/repo-preference";
 
+import validateSession from "@/services/auth";
 export async function PUT(
   request: Request,
-  { params }: { params: { owner: string; repo: string } }
+  context: { params: { owner: string; repo: string } }
 ) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.email) {
-    return new NextResponse("Unauthorized", { status: 401 });
-  }
+  const { session } = await validateSession();
+  const { owner, repo } = await context.params;
+  const [userId, repository] = [session.user?.id!, `${owner}/${repo}`];
+  const result = await setActiveRepository(userId, repository);
 
-  const dbUser = await prisma.user.findUnique({
-    where: { email: session.user.email },
-  });
-  if (!dbUser) {
-    return new NextResponse("User not found", { status: 404 });
-  }
-
-  const { owner, repo } = params;
-  const repository = `${owner}/${repo}`;
-
-  await prisma.repositoryPreference.updateMany({
-    where: { userId: dbUser.id },
-    data: { isActive: false },
-  });
-
-  await prisma.repositoryPreference.upsert({
-    where: {
-      userId_repository: {
-        userId: dbUser.id,
-        repository,
-      },
-    },
-    create: {
-      userId: dbUser.id,
-      repository,
-      isActive: true,
-      ignoredTypes: JSON.stringify(["Issue", "PullRequest", "Commit"]),
-    },
-    update: {
-      isActive: true,
-    },
-  });
-
-  return new NextResponse("OK", { status: 200 });
+  return Response.json({ data: result[1] });
 }

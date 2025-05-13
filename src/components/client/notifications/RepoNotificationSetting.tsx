@@ -2,8 +2,11 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Notification } from "@/types/notification";
 import NotificationList from "./NotificationList";
-
-export const NOTIFICATION_TYPE_LABELS = [
+import { NotificationKind } from "@/types/notification";
+export const NOTIFICATION_TYPE_LABELS: {
+  [key: string]: string;
+  value: NotificationKind;
+}[] = [
   {
     label: "Pull Requests",
     value: "PullRequest",
@@ -12,7 +15,11 @@ export const NOTIFICATION_TYPE_LABELS = [
   { label: "Issues", value: "Issue", desc: "問題報告和功能請求相關通知" },
   { label: "Commit", value: "Commit", desc: "程式碼提交相關通知" },
 ];
-const NOTIFICATION_TYPES = ["Issue", "PullRequest", "Commit"];
+const NOTIFICATION_TYPES: NotificationKind[] = [
+  "Issue",
+  "PullRequest",
+  "Commit",
+];
 
 export default function RepoNotificationSetting({
   repoName,
@@ -21,10 +28,9 @@ export default function RepoNotificationSetting({
 }: {
   repoName: string;
   notifications: Notification[];
-  preference: { ignoredTypes: string[] };
+  preference: { ignoredTypes: NotificationKind[] };
 }) {
   const queryClient = useQueryClient();
-
   const getPreferenceApiUrl = () => {
     const [owner, repo] = repoName.split("/");
     return `/api/repositories/${owner}/${repo}/preferences`;
@@ -45,10 +51,10 @@ export default function RepoNotificationSetting({
     },
     onMutate: async (payload: { types: string[] }) => {
       await queryClient.cancelQueries({ queryKey: ["repositories"] });
-      const previousData = queryClient.getQueryData<any[]>(["repositories"]);
-      queryClient.setQueryData<any[]>(["repositories"], (oldData) => {
+      const previousData = queryClient.getQueryData(["repositories"]);
+      queryClient.setQueryData(["repositories"], (oldData: any) => {
         if (!oldData) return oldData;
-        return oldData.map((repo) =>
+        return oldData.map((repo: any) =>
           repo.name === repoName
             ? {
                 ...repo,
@@ -69,7 +75,7 @@ export default function RepoNotificationSetting({
     },
   });
 
-  const handleTypeChange = (type: string) => {
+  const handleTypeChange = (type: NotificationKind) => {
     const newTypes = preference.ignoredTypes.includes(type)
       ? preference.ignoredTypes.filter((t) => t !== type)
       : [...preference.ignoredTypes, type];
@@ -83,7 +89,6 @@ export default function RepoNotificationSetting({
   const handleDeselectAll = () => {
     mutation.mutate({ types: [] });
   };
-
   const filteredNotifications = notifications.filter((n) =>
     preference.ignoredTypes.includes(n.subject.type)
   );
@@ -114,7 +119,6 @@ export default function RepoNotificationSetting({
               <input
                 type="checkbox"
                 name="notificationType"
-                value={type.value}
                 checked={preference.ignoredTypes.includes(type.value)}
                 onChange={() => handleTypeChange(type.value)}
                 className="w-4 h-4 accent-blue-500 mt-1"
@@ -134,7 +138,7 @@ export default function RepoNotificationSetting({
 
       <div className="flex-1">
         <h2 className="font-bold mb-4">通知列表</h2>
-        <div className="max-h-[400px] overflow-y-auto scrollbar-hide">
+        <div className="max-h-[600px] overflow-y-auto scrollbar-hide">
           <NotificationList notifications={filteredNotifications} />
         </div>
       </div>
