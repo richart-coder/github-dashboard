@@ -20,6 +20,6 @@ export async function PUT(
       data: preference,
     });
   } catch (error) {
-    return new Response("Internal Server Error", { status: 500 });
+    return Response.json({ data: null, error }, { status: 500 });
   }
 }

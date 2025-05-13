@@ -7,11 +7,17 @@ export async function PATCH(
 ) {
   try {
     const { session } = await validateSession();
-    await markNotificationAsRead(session, parseInt(params.threadId));
-    return new Response(JSON.stringify({ success: true }));
+    const result = await markNotificationAsRead(
+      session,
+      parseInt(params.threadId)
+    );
+    return Response.json({ data: result.data });
   } catch (error) {
-    return new Response(JSON.stringify({ error: "無法將通知設為已讀狀態" }), {
-      status: 500,
-    });
+    return Response.json(
+      { data: null, error },
+      {
+        status: 500,
+      }
+    );
   }
 }

@@ -41,8 +41,11 @@ export async function markNotificationAsRead(
   const octokit = new Octokit({
     auth: session?.accessToken,
   });
-
-  await octokit.activity.markThreadAsRead({
-    thread_id: threadId,
-  });
+  try {
+    return await octokit.activity.markThreadAsRead({
+      thread_id: threadId,
+    });
+  } catch (error) {
+    throw error;
+  }
 }
