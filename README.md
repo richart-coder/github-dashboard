@@ -16,8 +16,6 @@ marp: true
 - [主要功能](#主要功能)
 - [重要程式片段](#重要程式片段)
 - [如何啟動](#如何啟動)
-- [目前進度](#目前進度)
-- [下一步建議](#下一步建議)
 - [資料庫設計](#資料庫設計)
 - [常見問題](#常見問題)
 
@@ -28,25 +26,33 @@ marp: true
 ```
 src/
   app/
-    globals.css
-    layout.tsx
-    components/
-      client/
-        notifications/
-          NotificationList.tsx
-        providers/
-          AuthProvider.tsx
-          QueryProvider.tsx
-      server/
-        Notification.tsx
+    (dashboard)/
+      notifications/
+        page.tsx
+      repositories/
+        page.tsx
     api/
-      notifications/route.ts
-      auth/[...nextauth]/route.ts
-  data/
-    query-options/notifications.ts
+      repositories/
+        [owner]/[repo]/activate/route.ts
+        [owner]/[repo]/preferences/route.ts
+      notifications/[threadId]/read/route.ts
+  components/
+    client/
+      notifications/
+        RepoList.tsx
+        RepoNotificationSetting.tsx
+  repositories/
+    repo-preference.ts
+  services/
+    auth.ts
+    octokit.ts
+  adapters/
+    notificationAdapter.ts
+  viewModels/
+    createRepositoryViewModel.ts
   lib/
-    github.ts
-    react-query.ts
+    auth-config.ts
+    prisma.ts
 ```
 
 ---
@@ -56,19 +62,21 @@ src/
 - Next.js 14 (App Router)
 - React Query (資料快取與 hydration)
 - NextAuth (GitHub OAuth 登入)
+- Prisma (ORM)
 - Tailwind CSS (UI)
-- Marp (本文件)
+- TypeScript
 
 ---
 
 ## 主要功能
 
 - GitHub OAuth 登入
-- 取得並顯示 GitHub 通知（/api/notifications 代理）
-- 通知列表支援 SSR hydration + client-side cache
-- 通知網址自動對映 type（Issue/PullRequest）
-- 可讀性高的 UI 排版
-- Prisma schema 支援通知分組與優先度（NotificationGroup/Notification）
+- 取得並顯示 GitHub 通知
+- Repository 偏好設定（啟用/忽略型別）
+- 通知已讀/未讀狀態同步
+- SSR + React Query 快取
+- Prisma schema 支援 repository 偏好與通知
+- Adapter/service/viewModel 模組化
 
 ---
 
@@ -91,103 +99,42 @@ if (owner && repo && number && path) {
 
 ```bash
 npm install
+npx prisma migrate dev
 npm run dev
 ```
 
----
-
-## 目前進度
-
-- [x] GitHub OAuth 登入
-- [x] 取得/顯示 GitHub 通知
-- [x] SSR + Hydration + React Query 快取
-- [x] 通知網址 type-to-path 對映
-- [x] 全域樣式與 UI 美化
-- [x] Marp README 文件
-- [x] Prisma schema：通知分組、優先度、型別、狀態
-- [x] PAT bot 測試與 GitHub 通知觸發規則理解
-- [x] 本地狀態管理（優先度、已讀狀態）
-- [ ] Prisma 資料庫操作（CRUD）
-- [ ] 通知分組邏輯實作
-- [ ] 持久化儲存
-
----
-
-## 下一步建議
-
-- 支援更多通知型別
-- 通知已讀/未讀狀態
-- 搜尋與篩選
-- 多語系
+- 請設定 `.env` 檔案，包含 GitHub OAuth 與資料庫連線資訊
 
 ---
 
 ## 資料庫設計
 
-Prisma schema 支援通知分組與優先度，主要模型如下：
-
 ```prisma
-enum Priority {
-  CRITICAL
-  HIGH
-  MEDIUM
-  LOW
-  IGNORED
-}
+model RepositoryPreference {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  repository   String   /// owner/repoName
+  isActive     Boolean  @default(false)
+  ignoredTypes String   /// '["Issue", "PullRequest", "Commit"]'
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
-enum NotificationType {
-  PULL_REQUEST
-  ISSUE
-  COMMENT
-  REPOSITORY
-  SECURITY_ALERT
-  DEPENDENCY_UPDATE
-}
-
-enum NotificationStatus {
-  UNREAD
-  READ
-  ARCHIVED
-}
-
-model NotificationGroup {
-  id          String    @id @default(cuid())
-  type        NotificationType
-  repository  String
-  priority    Priority
-  status      NotificationStatus @default(UNREAD)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  count       Int       @default(1)
-  lastActivity DateTime @default(now())
-  notifications Notification[]
-}
-
-model Notification {
-  id          String            @id @default(cuid())
-  title       String
-  content     String
-  type        NotificationType
-  url         String
-  sender      String
-  createdAt   DateTime          @default(now())
-  groupId     String
-  group       NotificationGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
-  isRead      Boolean           @default(false)
+  @@unique([userId, repository])
 }
 ```
-
-這樣設計可支援：
-
-- 通知依 repo/type/priority 分組
-- 優先度（Priority）與狀態（Status）可用於 UI 分類與過濾
-- 支援多型別通知（PR/Issue/Comment...）
-
-> 注意：目前使用 localStorage 暫存本地狀態，尚未實作資料庫操作。
 
 ---
 
 ## 常見問題
+
+### Q: 為什麼 mutation API 還是回傳更新後的資料？
+
+A: 這是良好 API 設計原則，方便前端未來擴充、optimistic UI 或 debug。
+
+### Q: 為什麼 mutation 後前端不用回傳值而是重新 query？
+
+A: 這樣可確保資料一致性，避免快取與實際狀態不同步。
 
 ### Q: 為什麼自己 assign/@自己、自己評論都收不到 GitHub 通知？
 
