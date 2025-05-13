@@ -8,6 +8,7 @@ import { MarkdownComponents } from "./MarkdownComponents";
 import Spinner from "./Spinner";
 import useDialogControl from "./useDialogControl";
 import { notificationDetailQueryOptions } from "@/data/query-options/notifications";
+import type { RepoWithNotifications } from "@/types/notification";
 
 export default function NotificationList({
   notifications,
@@ -29,18 +30,38 @@ export default function NotificationList({
 
   const markAsReadMutation = useMutation({
     mutationFn: markAsRead,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: ["repo-notifications"] });
+      const previousData = queryClient.getQueryData<RepoWithNotifications[]>([
+        "repositories",
+      ]);
+      queryClient.setQueryData(
+        ["repositories"],
+        (oldData: RepoWithNotifications[] | undefined) => {
+          if (!oldData) return oldData;
+          return oldData.map((repo: RepoWithNotifications) => ({
+            ...repo,
+            notifications: repo.notifications.map(
+              (notification: Notification) =>
+                notification.id === id
+                  ? { ...notification, unread: false }
+                  : notification
+            ),
+          }));
+        }
+      );
+      return { previousData };
+    },
+    onError: (err, id, context) => {
+      if (context?.previousData) {
+        queryClient.setQueryData(["repositories"], context.previousData);
+      }
     },
   });
 
   const handleMarkAsRead = async (id: string, unread: boolean) => {
     if (!unread) return;
-    try {
-      await markAsReadMutation.mutateAsync(id);
-    } catch (error) {
-      console.error("Failed to mark notification as read:", error);
-    }
+    markAsReadMutation.mutate(id);
   };
 
   const handleShowContent = (id: string, title: string) => {

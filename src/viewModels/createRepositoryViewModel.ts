@@ -1,9 +1,8 @@
 import { RepositoryPreference } from "@prisma/client";
 import { Notification } from "@/types/notification";
-import type { components } from "@octokit/openapi-types";
-type GitHubNotification = components["schemas"]["thread"];
-import notificationAdapter from "@/adapters/notificationAdapter";
 
+import notificationAdapter from "@/adapters/notificationAdapter";
+import type { GitHubNotification } from "@/types/notification";
 export default function createRepositoryViewModels(
   preferences: RepositoryPreference[],
   notifications: GitHubNotification[],

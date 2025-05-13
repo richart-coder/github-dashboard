@@ -1,5 +1,7 @@
-export type NotificationKind = "Issue" | "PullRequest" | "Commit";
+import type { components } from "@octokit/openapi-types";
+export type GitHubNotification = components["schemas"]["thread"];
 
+export type NotificationKind = "Issue" | "PullRequest" | "Commit";
 export interface Notification {
   id: string;
   unread: boolean;

@@ -1,11 +1,16 @@
-export default function notificationAdapter(notification: any) {
+import type {
+  GitHubNotification,
+  NotificationKind,
+} from "@/types/notification";
+
+export default function notificationAdapter(notification: GitHubNotification) {
   return {
     id: notification.id,
     unread: notification.unread,
     subject: {
       title: notification.subject.title,
       url: notification.subject.url,
-      type: notification.subject.type,
+      type: notification.subject.type as NotificationKind,
     },
     updated_at: notification.updated_at,
     url: notification.url,

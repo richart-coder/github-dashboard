@@ -7,7 +7,7 @@ export function repositoriesQueryOptions(initialData: RepoWithNotifications[]) {
   return {
     queryKey: ["repositories"] as QueryKey,
     queryFn: async () => initialData,
-    staleTime: 30 * MINUTE,
+    staleTime: Infinity,
     gcTime: 60 * MINUTE,
     initialData,
     refetchOnMount: false,
