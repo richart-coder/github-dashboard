@@ -1,8 +1,10 @@
 "use client";
+import { useCallback } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Notification, GitHubNotificationType } from "@/types/notification";
+import { Notification } from "@/types/zod/notification";
+import { GitHubNotificationType } from "@/types/notification";
 import NotificationList from "./NotificationList";
-
+import toast from "react-hot-toast";
 export const NOTIFICATION_TYPE_LABELS: {
   [key: string]: string;
   value: GitHubNotificationType;
@@ -24,33 +26,41 @@ const NOTIFICATION_TYPES: GitHubNotificationType[] = [
 export default function RepoNotificationSetting({
   repoName,
   notifications,
-  preference = { ignoredTypes: NOTIFICATION_TYPES },
+  preference = { types: NOTIFICATION_TYPES },
 }: {
   repoName: string;
   notifications: Notification[];
-  preference: { ignoredTypes: GitHubNotificationType[] };
+  preference: { types: GitHubNotificationType[] };
 }) {
+  const toggleType = useCallback(
+    (
+      type: GitHubNotificationType,
+      condition: (types: GitHubNotificationType[]) => boolean
+    ) => {
+      return condition(preference.types)
+        ? preference.types.filter((t) => t !== type)
+        : preference.types.concat(type);
+    },
+    [preference.types]
+  );
   const queryClient = useQueryClient();
-  const getPreferenceApiUrl = () => {
-    const [owner, repo] = repoName.split("/");
-    return `/api/repositories/${owner}/${repo}/preferences`;
-  };
-
   const mutation = useMutation({
-    mutationFn: async (payload: { types: string[] }) => {
-      const url = getPreferenceApiUrl();
-      const res = await fetch(url, {
+    mutationKey: [repoName],
+    mutationFn: async (types: GitHubNotificationType[]) => {
+      const res = await fetch(`/api/repositories/${repoName}/preferences`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          ignoredTypes: payload.types,
+          types,
         }),
       });
-      if (!res.ok) throw new Error("更新失敗");
-      return res.json();
+      const result = await res.json();
+      if (!res.ok) {
+        throw result.error;
+      }
+      return result.data;
     },
-    onMutate: async (payload: { types: string[] }) => {
-      await queryClient.cancelQueries({ queryKey: ["repositories"] });
+    onMutate: (types: GitHubNotificationType[]) => {
       const previousData = queryClient.getQueryData(["repositories"]);
       queryClient.setQueryData(["repositories"], (oldData: any) => {
         if (!oldData) return oldData;
@@ -60,7 +70,7 @@ export default function RepoNotificationSetting({
                 ...repo,
                 preference: {
                   ...repo.preference,
-                  ignoredTypes: payload.types,
+                  types,
                 },
               }
             : repo
@@ -68,7 +78,8 @@ export default function RepoNotificationSetting({
       });
       return { previousData };
     },
-    onError: (err, payload, context) => {
+    onError: (err, _types, context) => {
+      toast.error(err.message);
       if (context?.previousData) {
         queryClient.setQueryData(["repositories"], context.previousData);
       }
@@ -76,21 +87,19 @@ export default function RepoNotificationSetting({
   });
 
   const handleTypeChange = (type: GitHubNotificationType) => {
-    const newTypes = preference.ignoredTypes.includes(type)
-      ? preference.ignoredTypes.filter((t) => t !== type)
-      : [...preference.ignoredTypes, type];
-    mutation.mutate({ types: newTypes });
+    const newTypes = toggleType(type, (types) => types.includes(type));
+    mutation.mutate(newTypes);
   };
 
   const handleSelectAll = () => {
-    mutation.mutate({ types: NOTIFICATION_TYPES });
+    mutation.mutate(NOTIFICATION_TYPES);
   };
 
   const handleDeselectAll = () => {
-    mutation.mutate({ types: [] });
+    mutation.mutate([]);
   };
   const filteredNotifications = notifications.filter((n) =>
-    preference.ignoredTypes.includes(n.subject.type)
+    preference.types.includes(n.subject.type)
   );
 
   return (
@@ -119,7 +128,7 @@ export default function RepoNotificationSetting({
               <input
                 type="checkbox"
                 name="notificationType"
-                checked={preference.ignoredTypes.includes(type.value)}
+                checked={preference.types.includes(type.value)}
                 onChange={() => handleTypeChange(type.value)}
                 className="w-4 h-4 accent-blue-500 mt-1"
                 id={`type-${type.value}-${repoName}`}

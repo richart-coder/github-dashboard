@@ -49,7 +49,7 @@ export async function ensureRepositoryPreferences(
         userId,
         repository: repoName,
         isActive: false,
-        ignoredTypes: JSON.stringify(["Issue", "PullRequest", "Commit"]),
+        types: '["Issue", "PullRequest", "Commit"]',
       })),
     });
 
@@ -83,16 +83,16 @@ export async function setActiveRepository(userId: string, repository: string) {
   }
 }
 
-export const updateRepositoryPreferenceIgnoreTypes = async (
+export const updateRepositoryPreferenceTypes = async (
   userId: string,
   repository: string,
-  ignoredTypes: GitHubNotificationType[],
+  types: GitHubNotificationType[],
   select?: Prisma.RepositoryPreferenceSelect
 ) => {
   try {
     return await prisma.repositoryPreference.update({
       where: { userId_repository: { userId, repository } },
-      data: { ignoredTypes: JSON.stringify(ignoredTypes) },
+      data: { types: JSON.stringify(types) },
       select,
     });
   } catch (error) {

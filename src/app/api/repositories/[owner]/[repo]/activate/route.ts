@@ -12,6 +12,10 @@ export async function PUT(
     const result = await setActiveRepository(userId, repository);
     return Response.json({ data: result[1] });
   } catch (error) {
-    return Response.json({ data: null, error }, { status: 500 });
+    console.error("無法啟用儲存庫", error);
+    return Response.json(
+      { data: null, error: { message: "無法啟用儲存庫" } },
+      { status: 500 }
+    );
   }
 }

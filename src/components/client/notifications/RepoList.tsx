@@ -3,8 +3,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { repositoriesQueryOptions } from "@/data/query-options/notifications";
 import RepoNotificationSetting from "./RepoNotificationSetting";
 import NProgress from "@/lib/nprogress";
-import type { RepoWithNotifications } from "@/types/notification";
-
+import type { RepoWithNotifications } from "@/types/zod/notification";
+import toast from "react-hot-toast";
 export default function RepoList({
   initialData,
 }: {
@@ -19,41 +19,36 @@ export default function RepoList({
 
   const { mutate: activateRepo } = useMutation({
     mutationFn: async (repoName: string) => {
-      const [owner, repo] = repoName.split("/");
-      const response = await fetch(
-        `/api/repositories/${owner}/${repo}/activate`,
-        {
-          method: "PUT",
-        }
-      );
-      if (!response.ok) throw new Error("Failed to activate repository");
+      const response = await fetch(`/api/repositories/${repoName}/activate`, {
+        method: "PUT",
+      });
       return response.json();
     },
-    onMutate: (repoName) => {
+    onMutate: async (repoName: string) => {
+      const previousData = queryClient.getQueryData<RepoWithNotifications[]>([
+        "repositories",
+      ]);
       NProgress.start();
-
       queryClient.setQueryData<RepoWithNotifications[]>(
         ["repositories"],
         (oldData) => {
           if (!oldData) return oldData;
-          return oldData.map((r) => ({
-            ...r,
-            isActive: r.name === repoName,
+          return oldData.map((repo) => ({
+            ...repo,
+            isActive: repo.name === repoName,
           }));
         }
       );
+      return { previousData };
     },
-    onError: (error, repoName) => {
-      queryClient.setQueryData<RepoWithNotifications[]>(
-        ["repositories"],
-        (oldData) => {
-          if (!oldData) return oldData;
-          return oldData.map((r) => ({
-            ...r,
-            isActive: r.name === currentRepo?.name,
-          }));
-        }
-      );
+    onError: (error, _repoName, context) => {
+      toast.error(error.message);
+      if (context?.previousData) {
+        queryClient.setQueryData<RepoWithNotifications[]>(
+          ["repositories"],
+          context.previousData
+        );
+      }
     },
     onSettled: () => {
       NProgress.done();

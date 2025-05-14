@@ -1,15 +1,14 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useCallback } from "react";
 import NotificationItem from "./NotificationItem";
-import { Notification } from "@/types/notification";
+import { Notification, RepoWithNotifications } from "@/types/zod/notification";
 import OverlayModal from "./OverlayModal";
 import ReactMarkdown from "react-markdown";
 import { MarkdownComponents } from "./MarkdownComponents";
 import Spinner from "./Spinner";
 import useDialogControl from "./useDialogControl";
 import { notificationDetailQueryOptions } from "@/data/query-options/notifications";
-import type { RepoWithNotifications } from "@/types/notification";
-
+import toast from "react-hot-toast";
 export default function NotificationList({
   notifications,
 }: {
@@ -30,14 +29,13 @@ export default function NotificationList({
 
   const markAsReadMutation = useMutation({
     mutationFn: markAsRead,
-    onMutate: async (id) => {
-      await queryClient.cancelQueries({ queryKey: ["repo-notifications"] });
+    onMutate: (id) => {
       const previousData = queryClient.getQueryData<RepoWithNotifications[]>([
         "repositories",
       ]);
       queryClient.setQueryData(
         ["repositories"],
-        (oldData: RepoWithNotifications[] | undefined) => {
+        (oldData: RepoWithNotifications[]) => {
           if (!oldData) return oldData;
           return oldData.map((repo: RepoWithNotifications) => ({
             ...repo,
@@ -52,7 +50,8 @@ export default function NotificationList({
       );
       return { previousData };
     },
-    onError: (err, id, context) => {
+    onError: (error, _id, context) => {
+      toast.error(error.message);
       if (context?.previousData) {
         queryClient.setQueryData(["repositories"], context.previousData);
       }
@@ -123,8 +122,5 @@ async function markAsRead(threadId: string) {
   const response = await fetch(`/api/notifications/${threadId}/read`, {
     method: "PATCH",
   });
-  if (!response.ok) {
-    throw new Error("Failed to mark notification as read");
-  }
   return response.json();
 }
