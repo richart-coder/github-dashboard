@@ -24,7 +24,7 @@ export default function NotificationItem({
   markAsReadPending,
   onShowContent,
 }: NotificationItemProps) {
-  const { id, subject, updated_at, unread, url, webUrl } = notification;
+  const { id, subject, updated_at, unread, webUrl } = notification;
 
   return (
     <div className="border rounded-lg p-4 space-y-2 bg-white shadow">
