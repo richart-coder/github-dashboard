@@ -30,7 +30,9 @@ export default function NotificationItem({
     <div className="border rounded-lg p-4 space-y-2 bg-white shadow">
       <div className="flex justify-between items-end">
         <div>
-          <p className="font-medium text-lg">{subject.title}</p>
+          <h2 className="font-semibold text-lg w-[40ch] line-clamp-2">
+            {subject.title}
+          </h2>
           <p className="text-gray-500 text-sm">{subject.type}</p>
           <p className="text-gray-400 text-xs">
             {updated_at ? new Date(updated_at).toLocaleString() : ""}
@@ -49,11 +51,11 @@ export default function NotificationItem({
             </button>
           </div>
         </div>
-        <div className="flex flex-col gap-2">
+        <div className="flex gap-6">
           {subject.url && (
             <button
               onClick={() => onShowContent(subject.url, subject.title)}
-              className="bg-blue-600 text-white rounded px-3 py-1 font-semibold hover:bg-blue-700 transition flex items-center justify-center cursor-pointer"
+              className="bg-blue-600 text-white rounded px-3 py-1 font-semibold hover:bg-blue-700 transition cursor-pointer"
             >
               查看內容
             </button>
