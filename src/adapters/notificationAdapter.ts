@@ -1,6 +1,8 @@
 import type { GitHubNotification } from "@/types/notification";
-
-export default function notificationAdapter(notification: GitHubNotification) {
+import { Notification } from "@/types/zod/notification";
+export default function notificationAdapter(
+  notification: GitHubNotification
+): Notification {
   return {
     id: notification.id,
     unread: notification.unread,

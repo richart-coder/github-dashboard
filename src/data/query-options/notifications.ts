@@ -1,5 +1,5 @@
 import type { QueryKey } from "@tanstack/react-query";
-import type { RepoWithNotifications } from "@/types/notification";
+import type { RepoWithNotifications } from "@/types/zod/notification";
 
 const MINUTE = 1000 * 60;
 

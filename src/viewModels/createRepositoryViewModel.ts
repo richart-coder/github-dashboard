@@ -1,5 +1,5 @@
 import { RepositoryPreference } from "@prisma/client";
-import { Notification } from "@/types/notification";
+import { Notification } from "@/types/zod/notification";
 
 import notificationAdapter from "@/adapters/notificationAdapter";
 import type { GitHubNotification } from "@/types/notification";
@@ -22,7 +22,7 @@ export default function createRepositoryViewModels(
     name: preference.repository,
     isActive: preference.isActive,
     preference: {
-      ignoredTypes: JSON.parse(preference.ignoredTypes),
+      types: JSON.parse(preference.types),
     },
     notifications: notificationMap.get(preference.repository) || [],
   }));

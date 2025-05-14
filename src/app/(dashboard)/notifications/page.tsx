@@ -20,6 +20,7 @@ async function getInitialData() {
   const { data: githubNotifications } = await fetchUserGitHubNotifications(
     session
   );
+
   const preferences = await getRepositoryPreferences(session.user.id);
   return createRepositoryViewModels(preferences, githubNotifications);
 }

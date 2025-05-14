@@ -17,13 +17,12 @@ model RepositoryPreference {
   id           String   @id @default(cuid())
   userId       String
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  repository   String /// owner/repoName
+  repository   String   /// owner/repoName
   isActive     Boolean  @default(false)
-  ignoredTypes String   /// '["Issue", "PullRequest", "Commit"]'
+  types        String   @default("[]") /// '["Issue", "PullRequest", "Commit"]'
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
   
- 
   @@unique([userId, repository])
 }
 
