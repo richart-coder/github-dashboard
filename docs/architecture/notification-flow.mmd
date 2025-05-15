@@ -1,0 +1,13 @@
+flowchart LR
+    A["GitHub API"] --> B["Fetch Notifications (octokit.ts)"]
+    B --> C["通知適配器 (notificationAdapter.ts)"]
+    C --> D["通知資料 (Notification)"]
+    D --> E["React Query 狀態管理"]
+    E --> F["RepoList.tsx"]
+    F --> G["RepoNotificationSetting.tsx"]
+    G --> H["NotificationList.tsx"]
+    H --> I["NotificationItem.tsx"]
+    H --> J["Dialog/OverlayModal"]
+    I --> K["用戶互動/標記已讀"]
+    K --> L["API: /api/notifications/[threadId]/read"]
+    L -->|更新| E
