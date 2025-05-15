@@ -1,4 +1,5 @@
 import React from "react";
+import Link from "next/link";
 
 type NotificationItemProps = {
   notification: {
@@ -60,14 +61,14 @@ export default function NotificationItem({
               查看內容
             </button>
           )}
-          <a
+          <Link
             href={webUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="underline text-blue-600 font-semibold px-2 py-1"
           >
             前往 GitHub
-          </a>
+          </Link>
         </div>
       </div>
     </div>

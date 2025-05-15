@@ -5,7 +5,7 @@ import { Notification, RepoWithNotifications } from "@/types/zod/notification";
 import OverlayModal from "./OverlayModal";
 import ReactMarkdown from "react-markdown";
 import { MarkdownComponents } from "./MarkdownComponents";
-import Spinner from "./Spinner";
+import Spinner from "../Spinner";
 import useDialogControl from "./useDialogControl";
 import { notificationDetailQueryOptions } from "@/data/query-options/notifications";
 import toast from "react-hot-toast";
@@ -82,6 +82,7 @@ export default function NotificationList({
           onShowContent={handleShowContent}
         />
       ))}
+
       <OverlayModal
         ref={dialogRef}
         onClose={handleCloseModal}
@@ -96,26 +97,13 @@ export default function NotificationList({
 }
 
 const detailContent = {
-  pending: (
-    <div className="flex-1 flex items-center justify-center">
-      <Spinner className="h-8 w-8 text-blue-600" />
-    </div>
+  pending: <Spinner />,
+  error: <div className="text-red-500">載入失敗，請稍後再試。</div>,
+  success: (detail: { body: string }) => (
+    <ReactMarkdown components={MarkdownComponents}>
+      {detail.body ?? "無詳細內容"}
+    </ReactMarkdown>
   ),
-  error: (
-    <div className="flex-1 flex items-center justify-center text-red-500">
-      載入失敗，請稍後再試。
-    </div>
-  ),
-  success: (detail: { body: string } | undefined) =>
-    detail?.body ? (
-      <ReactMarkdown components={MarkdownComponents}>
-        {detail.body}
-      </ReactMarkdown>
-    ) : (
-      <div className="flex-1 flex items-center justify-center text-gray-400 text-center py-8">
-        無詳細內容
-      </div>
-    ),
 };
 
 async function markAsRead(threadId: string) {

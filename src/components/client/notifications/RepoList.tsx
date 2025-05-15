@@ -19,10 +19,14 @@ export default function RepoList({
 
   const { mutate: activateRepo } = useMutation({
     mutationFn: async (repoName: string) => {
-      const response = await fetch(`/api/repositories/${repoName}/activate`, {
+      const res = await fetch(`/api/repositories/${repoName}/activate`, {
         method: "PUT",
       });
-      return response.json();
+      const result = await res.json();
+      if (!res.ok) {
+        throw result.error;
+      }
+      return result.data;
     },
     onMutate: async (repoName: string) => {
       const previousData = queryClient.getQueryData<RepoWithNotifications[]>([

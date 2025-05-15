@@ -18,7 +18,7 @@ const OverlayModal = forwardRef<HTMLDialogElement, OverlayModalProps>(
       }}
     >
       <div
-        className="scrollbar-hide bg-white rounded-lg shadow-lg max-w-2xl max-h-[80vh] min-h-[200px] min-w-[300px] flex flex-col overflow-y-auto p-6 relative"
+        className="scrollbar-hide bg-white rounded-lg shadow-lg w-2xl h-[80vh] min-h-[200px] flex flex-col overflow-y-auto p-6 relative"
         role="document"
         onClick={(e) => e.stopPropagation()}
       >
@@ -34,7 +34,7 @@ const OverlayModal = forwardRef<HTMLDialogElement, OverlayModalProps>(
             {title}
           </h2>
         )}
-        <div id="modal-description" className="flex-1 flex flex-col p-4">
+        <div id="modal-description" className="w-full h-full p-4">
           {children}
         </div>
       </div>
