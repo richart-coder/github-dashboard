@@ -7,17 +7,17 @@ function getWebUrl(notification: GitHubNotification) {
 
   if (!apiUrl || !type) return `https://github.com/${repoFullName}`;
 
-  const numberMatch = apiUrl.match(/\/(\d+)$/);
-  const shaMatch = apiUrl.match(/\/commits\/([a-f0-9]+)$/);
+  const [_, number] = apiUrl.match(/\/(\d+)$/) ?? [];
+  const [__, sha] = apiUrl.match(/\/commits\/([a-f0-9]+)$/) ?? [];
 
-  if (type === "PullRequest" && numberMatch) {
-    return `https://github.com/${repoFullName}/pull/${numberMatch[1]}`;
+  if (type === "PullRequest" && number) {
+    return `https://github.com/${repoFullName}/pull/${number}`;
   }
-  if (type === "Issue" && numberMatch) {
-    return `https://github.com/${repoFullName}/issues/${numberMatch[1]}`;
+  if (type === "Issue" && number) {
+    return `https://github.com/${repoFullName}/issues/${number}`;
   }
-  if (type === "Commit" && shaMatch) {
-    return `https://github.com/${repoFullName}/commit/${shaMatch[1]}`;
+  if (type === "Commit" && sha) {
+    return `https://github.com/${repoFullName}/commit/${sha}`;
   }
 
   return `https://github.com/${repoFullName}`;

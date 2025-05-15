@@ -1,7 +1,7 @@
 import React from "react";
 
 export default function Spinner({
-  className = "h-5 w-5 text-white",
+  className = "h-8 w-8 text-blue-500 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2",
 }: {
   className?: string;
 }) {
