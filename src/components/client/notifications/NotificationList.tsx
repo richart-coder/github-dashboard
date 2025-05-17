@@ -5,7 +5,8 @@ import { Notification, RepoWithNotifications } from "@/types/zod/notification";
 import OverlayModal from "./OverlayModal";
 import ReactMarkdown from "react-markdown";
 import { MarkdownComponents } from "./MarkdownComponents";
-import Spinner from "../Spinner";
+
+import Spinner from "@/components/client/ui/Spinner";
 import useDialogControl from "./useDialogControl";
 import { notificationDetailQueryOptions } from "@/data/query-options/notifications";
 import toast from "react-hot-toast";
