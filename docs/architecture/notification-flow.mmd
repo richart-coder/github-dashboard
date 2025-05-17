@@ -20,7 +20,7 @@ flowchart TD
     %% 用戶交互 - 查看詳情
     Display --> |"點擊查看詳情"| DetailClick["觸發詳細加載"]
     DetailClick --> DetailQuery["useQuery notificationDetailQueryOptions"]
-    DetailFetch --> DetailAPI["從 API 獲取詳情"]
+    DetailQuery DetailAPI["從 API 獲取詳情"]
     DetailAPI --> ShowDetail["顯示通知詳情"]
     
     %% 用戶交互 - 標記已讀

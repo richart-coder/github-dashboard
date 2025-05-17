@@ -9,7 +9,6 @@ export function Button({
   className?: string;
   children?: React.ReactNode;
 }) {
-  console.log("render button");
   return (
     <button className={className} onClick={onClick} {...props}>
       {children}
