@@ -1,44 +1,48 @@
 flowchart TD
-    %% 數據層
-    A["GitHub API"] --> B["Fetch Notifications\n(octokit.ts)"]
-    B --> C["通知適配器(notificationAdapter.ts)"]
-    C --> D["通知資料(Notification)"]
-    D --> E["React Query狀態管理"]
+    %% 頂部導航功能
+    A["GitHub 通知應用"] --> A1["獲取認證會話"]
+    A --> A2["獲取用戶倉庫列表"] 
+    A --> A3["獲取所有通知數據"]
+    A --> A4["獲取用戶倉庫設置"]
+    A --> A5["構建視圖模型"]
     
-    %% 倉庫層
-    E --> F["RepoList.tsx(顯示倉庫列表)"]
-    F -->|"選擇倉庫"| G["RepoNotificationSetting.tsx(管理通知偏好設置)"]
+    %% 資料流 - 伺服器到客戶端
+    A5 --> SSR["SSR - 作為 props 傳遞"]
+    SSR --> Init["initialData 注入 RepoList 元件"]
+    Init --> Hydrate["水合處理"]
+    Hydrate --> ClientHydrate["Client Hydration (React Query 初始化)"]
+    ClientHydrate --> NoRefetch["useQuery with initialData 無需再次獲取"]
+    NoRefetch --> RQState["React Query 狀態管理"]
     
-    %% RepoNotificationSetting 詳細功能
-    G1["通知類型選擇：- Pull Requests- Issues- Commit"] -->|"包含於"| G
-    G2["通知過濾機制：- filter() 根據類型篩選通知"] -->|"包含於"| G
-    G3["用戶交互：- 切換類型- 全選/取消全選"] -->|"包含於"| G
-    G4["狀態更新：- useMutation - 樂觀更新 - 錯誤回滾"] -->|"包含於"| G
+    %% 資料使用和更新流程
+    RQState --> Display["顯示倉庫和通知列表"]
     
-    %% 倉庫偏好設置流程
-    G -->|"PUT 更新通知類型偏好"| M["API: /repositories/:repo/preferences"]
-    M -->|"更新 queryClient 緩存"| E
+    %% 用戶交互 - 查看詳情
+    Display --> |"點擊查看詳情"| DetailClick["觸發詳細加載"]
+    DetailClick --> DetailQuery["useQuery notificationDetailQueryOptions"]
+    DetailFetch --> DetailAPI["從 API 獲取詳情"]
+    DetailAPI --> ShowDetail["顯示通知詳情"]
     
-    %% 通知顯示層
-    G -->|"傳遞過濾後的通知 filteredNotifications"| H["NotificationList.tsx(顯示通知列表)"]
-    H --> I["NotificationItem.tsx(單個通知項目)"]
-    H -->|"點擊查看詳情"| J["Dialog/OverlayModal(通知詳細內容)"]
+    %% 用戶交互 - 標記已讀
+    Display --> |"點擊標記已讀"| ReadClick["觸發標記已讀"]
+    ReadClick --> ReadMutation["useMutation 立即更改快取狀態"]
+    ReadMutation --> ReadPatch["PATCH /api/notifications/:id/read"]
+    ReadPatch --> RQState
     
-    %% 用戶交互層
-    I -->|"標記已讀按鈕"| K["用戶互動/標記已讀"]
-    K --> L["API: /api/notifications/\n[threadId]/read"]
-    L -->|"更新通知狀態"| E
+    %% 用戶交互 - 更新偏好設置
+    Display --> |"更改通知偏好"| PrefClick["更改倉庫偏好設置"]
+    PrefClick --> PrefMutation["useMutation 立即更改快取狀態"]
+    PrefMutation --> PrefPut["PUT /repositories/:repo/preferences"]
+    PrefPut --> RQState
     
-    %% 樣式定義
-    classDef apiNode fill:#ffcc99,stroke:#ff9900,stroke-width:2px;
-    classDef dataNode fill:#99ccff,stroke:#3399ff,stroke-width:2px;
-    classDef componentNode fill:#ccffcc,stroke:#66cc66,stroke-width:2px;
-    classDef actionNode fill:#ffccff,stroke:#cc66cc,stroke-width:2px;
-    classDef detailNode fill:#f9f9f9,stroke:#999999,stroke-width:1px,stroke-dasharray: 5 5;
+    %% 樣式設定
+    classDef serverNode fill:#f9d77e,stroke:#f9a11b,stroke-width:2px;
+    classDef dataFlowNode fill:#a8d1ff,stroke:#3182ce,stroke-width:2px;
+    classDef actionNode fill:#9ae6b4,stroke:#38a169,stroke-width:2px;
+    classDef apiNode fill:#fbd5e0,stroke:#d53f8c,stroke-width:2px;
     
     %% 應用樣式
-    class A,B,M,L apiNode;
-    class C,D,E dataNode;
-    class F,G,H,I,J componentNode;
-    class K actionNode;
-    class G1,G2,G3,G4 detailNode;
+    class A,A1,A2,A3,A4,A5 serverNode;
+    class SSR,Init,Hydrate,ClientHydrate,NoRefetch,RQState,Display dataFlowNode;
+    class DetailClick,ReadClick,PrefClick,DetailQuery,ReadMutation,PrefMutation actionNode;
+    class DetailFetch,DetailAPI,ShowDetail,ReadPatch,PrefPut apiNode;
