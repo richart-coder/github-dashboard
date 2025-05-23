@@ -1,4 +1,6 @@
-export const NOTIFICATION_TYPE_LABELS: {
+import React from "react";
+import { GitHubNotificationType } from "@/types/notification";
+const NOTIFICATION_TYPE_LABELS: {
   [key: string]: string;
   value: GitHubNotificationType;
 }[] = [
@@ -10,8 +12,7 @@ export const NOTIFICATION_TYPE_LABELS: {
   { label: "Issues", value: "Issue", desc: "問題報告和功能請求相關通知" },
   { label: "Commit", value: "Commit", desc: "程式碼提交相關通知" },
 ];
-import { GitHubNotificationType } from "@/types/notification";
-import React from "react";
+
 export default function TypeList({
   types,
   onChange,

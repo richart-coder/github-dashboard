@@ -1,13 +1,13 @@
-import React, { forwardRef } from "react";
+import React, { forwardRef, memo } from "react";
 
 type OverlayModalProps = {
-  title?: string;
+  title: string;
+  onClose: () => void;
   children: React.ReactNode;
-  onClose?: () => void;
 };
 
 const OverlayModal = forwardRef<HTMLDialogElement, OverlayModalProps>(
-  ({ title, children, onClose }, ref) => (
+  ({ title, onClose, children }, ref) => (
     <dialog
       ref={ref}
       aria-modal="true"
@@ -29,11 +29,9 @@ const OverlayModal = forwardRef<HTMLDialogElement, OverlayModalProps>(
         >
           x
         </button>
-        {title && (
-          <h2 id="modal-title" className="text-lg font-bold mb-4">
-            {title}
-          </h2>
-        )}
+        <h2 id="modal-title" className="text-lg font-bold mb-4">
+          {title}
+        </h2>
         <div id="modal-description" className="w-full h-full p-4">
           {children}
         </div>
@@ -42,4 +40,4 @@ const OverlayModal = forwardRef<HTMLDialogElement, OverlayModalProps>(
   )
 );
 
-export default OverlayModal;
+export default memo(OverlayModal);

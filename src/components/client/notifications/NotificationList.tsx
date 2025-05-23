@@ -1,32 +1,25 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState, useCallback } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useCallback, useState } from "react";
 import NotificationItem from "./NotificationItem";
 import { Notification, RepoWithNotifications } from "@/types/zod/notification";
-import OverlayModal from "./OverlayModal";
-import ReactMarkdown from "react-markdown";
-import { MarkdownComponents } from "./MarkdownComponents";
-
-import Spinner from "@/components/client/ui/Spinner";
+import MemoizedOverlayModal from "./OverlayModal";
+import OverlayModalContent from "./OverlayModalContent";
 import useDialogControl from "./useDialogControl";
-import { notificationDetailQueryOptions } from "@/data/query-options/notifications";
 import toast from "react-hot-toast";
+
 export default function NotificationList({
   notifications,
 }: {
   notifications: Notification[];
 }) {
   const queryClient = useQueryClient();
-
-  const [dialogRef, openDialog, closeDialog] = useDialogControl();
-  const handleCloseModal = useCallback(() => {
-    closeDialog();
-  }, [closeDialog]);
+  const {
+    ref: dialogRef,
+    open: openDialog,
+    close: closeDialog,
+  } = useDialogControl();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [selectedTitle, setSelectedTitle] = useState<string>("");
-
-  const { data: detail, status: detailStatus } = useQuery<{ body: string }>(
-    notificationDetailQueryOptions(selectedId)
-  );
 
   const markAsReadMutation = useMutation({
     mutationFn: markAsRead,
@@ -59,16 +52,16 @@ export default function NotificationList({
     },
   });
 
-  const handleMarkAsRead = async (id: string, unread: boolean) => {
+  const handleMark = useCallback((id: string, unread: boolean) => {
     if (!unread) return;
     markAsReadMutation.mutate(id);
-  };
+  }, []);
 
-  const handleShowContent = (id: string, title: string) => {
+  const handleShowContent = useCallback((id: string, title: string) => {
     setSelectedId(id);
     setSelectedTitle(title);
     openDialog();
-  };
+  }, []);
 
   if (!notifications || notifications.length === 0) return <div>沒有通知</div>;
 
@@ -78,34 +71,22 @@ export default function NotificationList({
         <NotificationItem
           key={notification.id}
           notification={notification}
-          onMarkAsRead={handleMarkAsRead}
-          markAsReadPending={markAsReadMutation.isPending}
+          onMark={handleMark}
+          pending={markAsReadMutation.isPending}
           onShowContent={handleShowContent}
         />
       ))}
 
-      <OverlayModal
+      <MemoizedOverlayModal
         ref={dialogRef}
-        onClose={handleCloseModal}
+        onClose={closeDialog}
         title={selectedTitle}
       >
-        {detailStatus === "success"
-          ? detailContent.success(detail)
-          : detailContent[detailStatus]}
-      </OverlayModal>
+        <OverlayModalContent id={selectedId} />
+      </MemoizedOverlayModal>
     </div>
   );
 }
-
-const detailContent = {
-  pending: <Spinner />,
-  error: <div className="text-red-500">載入失敗，請稍後再試。</div>,
-  success: (detail: { body: string }) => (
-    <ReactMarkdown components={MarkdownComponents}>
-      {detail.body ?? "無詳細內容"}
-    </ReactMarkdown>
-  ),
-};
 
 async function markAsRead(threadId: string) {
   const response = await fetch(`/api/notifications/${threadId}/read`, {
