@@ -1,10 +1,6 @@
 import { useRef, useCallback } from "react";
 
-export default function useDialogControl(): [
-  React.RefObject<HTMLDialogElement | null>,
-  () => void,
-  () => void
-] {
+export default function useDialogControl() {
   const dialogRef = useRef<HTMLDialogElement | null>(null);
 
   const open = useCallback(() => {
@@ -17,5 +13,9 @@ export default function useDialogControl(): [
     if (dialog?.open) dialog.close();
   }, []);
 
-  return [dialogRef, open, close];
+  return {
+    ref: dialogRef,
+    open,
+    close,
+  };
 }

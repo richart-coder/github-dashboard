@@ -5,6 +5,7 @@ import RepoNotificationSetting from "./RepoNotificationSetting";
 import NProgress from "@/lib/nprogress";
 import type { RepoWithNotifications } from "@/types/zod/notification";
 import toast from "react-hot-toast";
+import React from "react";
 export default function RepoList({
   initialData,
 }: {
