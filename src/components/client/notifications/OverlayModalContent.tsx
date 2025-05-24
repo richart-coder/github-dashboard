@@ -1,7 +1,7 @@
 import ReactMarkdown from "react-markdown";
 import { MarkdownComponents } from "./MarkdownComponents";
 import Spinner from "@/components/client/ui/Spinner";
-import { notificationDetailQueryOptions } from "@/data/query-options/notifications";
+import { notificationDetailQueryOptions } from "@/data/query-options/repo";
 import { useQuery } from "@tanstack/react-query";
 
 const OverlayModalContent = ({ id }: { id: string | null }) => {

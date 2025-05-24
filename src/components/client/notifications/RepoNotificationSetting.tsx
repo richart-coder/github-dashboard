@@ -1,27 +1,30 @@
 "use client";
 import { MemoizedButton } from "@/components/client/ui/Button";
 import { useCallback } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Notification } from "@/types/zod/notification";
+import { useMutation } from "@tanstack/react-query";
+import { RepoWithNotifications } from "@/types/zod/notification";
 import { GitHubNotificationType } from "@/types/notification";
 import NotificationList from "./NotificationList";
-import toast from "react-hot-toast";
 import TypeList from "./TypeList";
+import { repoPreferenceMutationOptions } from "@/data/mutation-options/repo";
 const NOTIFICATION_TYPES: GitHubNotificationType[] = [
   "Issue",
   "PullRequest",
   "Commit",
 ];
-
+type RepoNotificationSettingProps = {
+  repo: RepoWithNotifications;
+};
 export default function RepoNotificationSetting({
-  repoName,
-  notifications,
-  preference = { types: NOTIFICATION_TYPES },
-}: {
-  repoName: string;
-  notifications: Notification[];
-  preference: { types: GitHubNotificationType[] };
-}) {
+  repo,
+}: RepoNotificationSettingProps) {
+  const {
+    name,
+    notifications,
+    preference = { types: NOTIFICATION_TYPES },
+  } = repo;
+  const mutation = useMutation(repoPreferenceMutationOptions(name));
+
   const toggleType = useCallback(
     (
       type: GitHubNotificationType,
@@ -33,48 +36,6 @@ export default function RepoNotificationSetting({
     },
     [preference.types]
   );
-  const queryClient = useQueryClient();
-  const mutation = useMutation({
-    mutationKey: [repoName],
-    mutationFn: async (types: GitHubNotificationType[]) => {
-      const res = await fetch(`/api/repositories/${repoName}/preferences`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          types,
-        }),
-      });
-      const result = await res.json();
-      if (!res.ok) {
-        throw result.error;
-      }
-      return result.data;
-    },
-    onMutate: (types: GitHubNotificationType[]) => {
-      const previousData = queryClient.getQueryData(["repositories"]);
-      queryClient.setQueryData(["repositories"], (oldData: any) => {
-        if (!oldData) return oldData;
-        return oldData.map((repo: any) =>
-          repo.name === repoName
-            ? {
-                ...repo,
-                preference: {
-                  ...repo.preference,
-                  types,
-                },
-              }
-            : repo
-        );
-      });
-      return { previousData };
-    },
-    onError: (err, _types, context) => {
-      toast.error(err.message);
-      if (context?.previousData) {
-        queryClient.setQueryData(["repositories"], context.previousData);
-      }
-    },
-  });
 
   const handleTypeChange = (type: GitHubNotificationType) => {
     const newTypes = toggleType(type, (types) => types.includes(type));

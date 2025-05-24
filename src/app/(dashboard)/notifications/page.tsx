@@ -7,7 +7,7 @@ import {
   getRepositoryPreferences,
   ensureRepositoryPreferences,
 } from "@/repositories/repo-preference";
-import RepoList from "@/components/client/notifications/RepoList";
+import RepoSelector from "@/components/client/notifications/RepoSelector";
 import createRepositoryViewModels from "@/viewModels/createRepositoryViewModel";
 
 async function getInitialData() {
@@ -27,5 +27,5 @@ async function getInitialData() {
 
 export default async function NotificationsPage() {
   const initialData = await getInitialData();
-  return <RepoList initialData={initialData} />;
+  return <RepoSelector repos={initialData} />;
 }
