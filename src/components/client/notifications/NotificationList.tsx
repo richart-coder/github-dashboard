@@ -1,18 +1,17 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { useCallback, useState } from "react";
 import NotificationItem from "./NotificationItem";
-import { Notification, RepoWithNotifications } from "@/types/zod/notification";
+import { Notification } from "@/types/zod/notification";
 import MemoizedOverlayModal from "./OverlayModal";
 import OverlayModalContent from "./OverlayModalContent";
-import useDialogControl from "./useDialogControl";
-import toast from "react-hot-toast";
+import useDialogControl from "./hooks/useDialogControl";
+import { repoNotificationUnreadMutationOptions } from "@/data/mutation-options/repo";
 
 export default function NotificationList({
   notifications,
 }: {
   notifications: Notification[];
 }) {
-  const queryClient = useQueryClient();
   const {
     ref: dialogRef,
     open: openDialog,
@@ -21,36 +20,9 @@ export default function NotificationList({
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [selectedTitle, setSelectedTitle] = useState<string>("");
 
-  const markAsReadMutation = useMutation({
-    mutationFn: markAsRead,
-    onMutate: (id) => {
-      const previousData = queryClient.getQueryData<RepoWithNotifications[]>([
-        "repositories",
-      ]);
-      queryClient.setQueryData(
-        ["repositories"],
-        (oldData: RepoWithNotifications[]) => {
-          if (!oldData) return oldData;
-          return oldData.map((repo: RepoWithNotifications) => ({
-            ...repo,
-            notifications: repo.notifications.map(
-              (notification: Notification) =>
-                notification.id === id
-                  ? { ...notification, unread: false }
-                  : notification
-            ),
-          }));
-        }
-      );
-      return { previousData };
-    },
-    onError: (error, _id, context) => {
-      toast.error(error.message);
-      if (context?.previousData) {
-        queryClient.setQueryData(["repositories"], context.previousData);
-      }
-    },
-  });
+  const markAsReadMutation = useMutation(
+    repoNotificationUnreadMutationOptions()
+  );
 
   const handleMark = useCallback((id: string, unread: boolean) => {
     if (!unread) return;
@@ -86,11 +58,4 @@ export default function NotificationList({
       </MemoizedOverlayModal>
     </div>
   );
-}
-
-async function markAsRead(threadId: string) {
-  const response = await fetch(`/api/notifications/${threadId}/read`, {
-    method: "PATCH",
-  });
-  return response.json();
 }
