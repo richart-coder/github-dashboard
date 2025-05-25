@@ -4,8 +4,7 @@ import { repositoriesQueryOptions } from "@/data/query-options/repo";
 import { repoActiveMutationOptions } from "@/data/mutation-options/repo";
 import RepoNotificationSetting from "./RepoNotificationSetting";
 import type { RepoWithNotifications } from "@/types/zod/notification";
-
-import React from "react";
+import React, { useState, useMemo } from "react";
 
 export default function RepoSelector({
   repos,
@@ -15,30 +14,75 @@ export default function RepoSelector({
   const { data } = useQuery<RepoWithNotifications[]>(
     repositoriesQueryOptions(repos)
   );
-  const { mutate: activateRepo } = useMutation(repoActiveMutationOptions());
-  const currentRepo = data.find((repo) => repo.isActive) || data?.[0];
 
+  const [selectedName, setSelectedName] = useState<string>(
+    () => (data.find((repo) => repo.isActive)?.name || data[0]?.name) ?? ""
+  );
+
+  const activeMutation = useMutation(repoActiveMutationOptions());
+  const handleSelect = (repoName: string) => {
+    setSelectedName(repoName);
+    activeMutation.mutate(repoName);
+  };
+
+  if (data.length == 0) {
+    return (
+      <div className="p-12">
+        <div className="mb-8">
+          <label htmlFor="repo-select" className="sr-only">
+            沒有儲存庫
+          </label>
+          <RepoSelect
+            selectedRepoName={selectedName}
+            repoNames={["請先新增儲存庫"]}
+          />
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="p-12">
       <div className="mb-8">
         <label htmlFor="repo-select" className="sr-only">
           選擇儲存庫
         </label>
-        <select
-          id="repo-select"
-          aria-label="選擇儲存庫"
-          value={currentRepo.name}
-          onChange={(e) => activateRepo(e.target.value)}
-          className="border rounded px-3 py-2 w-full max-w-md"
-        >
-          {data.map((repo) => (
-            <option key={repo.name} value={repo.name}>
-              {repo.name}
-            </option>
-          ))}
-        </select>
+        <RepoSelect
+          selectedRepoName={selectedName}
+          repoNames={useMemo(() => data.map((repo) => repo.name), [data])}
+          onSelect={handleSelect}
+        />
       </div>
-      <RepoNotificationSetting repo={currentRepo} />
+
+      <RepoNotificationSetting
+        repo={data.find((repo) => repo.isActive) || data[0]}
+      />
     </div>
   );
 }
+
+type RepoSelectProps = {
+  selectedRepoName: string;
+  repoNames: string[];
+  onSelect?: (repoName: string) => void;
+};
+
+const RepoSelect = ({
+  selectedRepoName,
+  repoNames,
+  onSelect,
+}: RepoSelectProps) => {
+  return (
+    <select
+      id="repo-select"
+      value={selectedRepoName}
+      onChange={(e) => onSelect?.(e.target.value)}
+      className="border rounded px-3 py-2 w-full max-w-md"
+    >
+      {repoNames.map((repoName) => (
+        <option key={repoName} value={repoName}>
+          {repoName}
+        </option>
+      ))}
+    </select>
+  );
+};

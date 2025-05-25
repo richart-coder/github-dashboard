@@ -81,7 +81,6 @@ NotificationItem.Mark = memo(
     pending: boolean;
     onMark: (id: string, unread: boolean) => void;
   }) => {
-    console.log("render");
     return (
       <button
         onClick={() => onMark(id, unread)}
