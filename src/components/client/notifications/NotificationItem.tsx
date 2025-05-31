@@ -1,5 +1,5 @@
-import React, { memo } from "react";
 import Link from "next/link";
+import { memo } from "react";
 
 type NotificationItemProps = {
   notification: {
@@ -128,3 +128,7 @@ NotificationItem.Actions = memo(
     );
   }
 );
+
+NotificationItem.Info.displayName = "NotificationItem.Info";
+NotificationItem.Mark.displayName = "NotificationItem.Mark";
+NotificationItem.Actions.displayName = "NotificationItem.Actions";

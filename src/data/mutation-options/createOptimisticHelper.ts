@@ -1,6 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 
-function createOptimisticHelper(queryKey: string[]) {
+function useOptimisticHelper(queryKey: string[]) {
   const queryClient = useQueryClient();
 
   const optimisticUpdate = async <T>(
@@ -23,4 +23,4 @@ function createOptimisticHelper(queryKey: string[]) {
   return { optimisticUpdate, rollback, invalidate };
 }
 
-export default createOptimisticHelper;
+export default useOptimisticHelper;

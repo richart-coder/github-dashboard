@@ -1,11 +1,11 @@
+import { repoNotificationUnreadMutationOptions } from "@/data/mutation-options/repo";
+import type { Notification } from "@/types/zod/notification";
 import { useMutation } from "@tanstack/react-query";
 import { useCallback, useState } from "react";
+import useDialogControl from "./hooks/useDialogControl";
 import NotificationItem from "./NotificationItem";
-import { Notification } from "@/types/zod/notification";
 import MemoizedOverlayModal from "./OverlayModal";
 import OverlayModalContent from "./OverlayModalContent";
-import useDialogControl from "./hooks/useDialogControl";
-import { repoNotificationUnreadMutationOptions } from "@/data/mutation-options/repo";
 
 export default function NotificationList({
   notifications,

@@ -1,14 +1,14 @@
+import createRepositoryViewModels from "@/app/(dashboard)/notifications/createRepositoryViewModel";
+import RepoSelector from "@/components/client/notifications/RepoSelector";
+import {
+  ensureRepositoryPreferences,
+  getRepositoryPreferences,
+} from "@/repositories/repo-preference";
 import validateSession from "@/services/auth";
 import {
-  fetchUserGitHubRepositories,
   fetchUserGitHubNotifications,
+  fetchUserGitHubRepositories,
 } from "@/services/octokit";
-import {
-  getRepositoryPreferences,
-  ensureRepositoryPreferences,
-} from "@/repositories/repo-preference";
-import RepoSelector from "@/components/client/notifications/RepoSelector";
-import createRepositoryViewModels from "@/viewModels/createRepositoryViewModel";
 
 async function getInitialData() {
   const { session } = await validateSession();

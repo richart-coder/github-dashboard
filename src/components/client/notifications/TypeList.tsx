@@ -1,5 +1,4 @@
-import React from "react";
-import { GitHubNotificationType } from "@/types/notification";
+import type { GitHubNotificationType } from "@/types/notification";
 const NOTIFICATION_TYPE_LABELS: {
   [key: string]: string;
   value: GitHubNotificationType;
