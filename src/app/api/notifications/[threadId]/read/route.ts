@@ -1,5 +1,5 @@
-import { markNotificationAsRead } from "@/services/octokit";
 import validateSession from "@/services/auth";
+import { markNotificationAsRead } from "@/services/octokit";
 
 export async function PATCH(
   request: Request,

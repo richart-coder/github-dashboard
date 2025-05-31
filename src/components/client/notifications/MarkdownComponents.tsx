@@ -1,6 +1,5 @@
 import React from "react";
-import { Components } from "react-markdown";
-
+import type { Components } from "react-markdown";
 interface CodeProps {
   inline?: boolean;
   className?: string;
@@ -68,8 +67,10 @@ export const MarkdownComponents: Components = {
       {...props}
     />
   ),
-
-  img: (props) => (
+  /* 使用原生 img 因為這是 owner 控制的優化圖片 */
+  /* eslint-disable @next/next/no-img-element */
+  /* eslint-disable jsx-a11y/alt-text */
+  img: (...props) => (
     <img
       className="max-w-full h-auto my-4 rounded-md border border-gray-200"
       {...props}

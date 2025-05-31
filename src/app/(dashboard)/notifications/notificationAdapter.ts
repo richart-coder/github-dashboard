@@ -1,5 +1,5 @@
 import type { GitHubNotification } from "@/types/notification";
-import { Notification } from "@/types/zod/notification";
+import type { Notification } from "@/types/zod/notification";
 function getWebUrl(notification: GitHubNotification) {
   const { subject, repository } = notification;
   const repoFullName = repository.full_name;
@@ -7,8 +7,8 @@ function getWebUrl(notification: GitHubNotification) {
 
   if (!apiUrl || !type) return `https://github.com/${repoFullName}`;
 
-  const [_, number] = apiUrl.match(/\/(\d+)$/) ?? [];
-  const [__, sha] = apiUrl.match(/\/commits\/([a-f0-9]+)$/) ?? [];
+  const [, number] = apiUrl.match(/\/(\d+)$/) ?? [];
+  const [, sha] = apiUrl.match(/\/commits\/([a-f0-9]+)$/) ?? [];
 
   if (type === "PullRequest" && number) {
     return `https://github.com/${repoFullName}/pull/${number}`;

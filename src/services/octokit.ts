@@ -1,5 +1,5 @@
 import { Octokit } from "@octokit/rest";
-import { Session } from "next-auth";
+import type { Session } from "next-auth";
 
 export async function fetchUserGitHubRepositories(session: Session) {
   const octokit = new Octokit({

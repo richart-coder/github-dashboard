@@ -1,12 +1,14 @@
 "use client";
+
 import { MemoizedButton } from "@/components/client/ui/Button";
-import { useCallback } from "react";
+import { repoPreferenceMutationOptions } from "@/data/mutation-options/repo";
+import type { GitHubNotificationType } from "@/types/notification";
+import type { RepoWithNotifications } from "@/types/zod/notification";
 import { useMutation } from "@tanstack/react-query";
-import { RepoWithNotifications } from "@/types/zod/notification";
-import { GitHubNotificationType } from "@/types/notification";
+import { useCallback } from "react";
 import NotificationList from "./NotificationList";
 import TypeList from "./TypeList";
-import { repoPreferenceMutationOptions } from "@/data/mutation-options/repo";
+
 const NOTIFICATION_TYPES: GitHubNotificationType[] = [
   "Issue",
   "PullRequest",
